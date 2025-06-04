@@ -5,7 +5,7 @@ let routingControl;
 let iconPath;
 let distance;
 let markers={};
-let riderCoordinates = [30.104867698463696, 78.29907060455753];
+let userCoordinates = [12.957185112349007, 77.71035176059814];
 let busLottie = L.divIcon({
     html: '<div id="lottie"></div>',
     iconSize: [60, 60],
@@ -27,7 +27,7 @@ function initLottie() {
             renderer: 'svg',
             loop: true,
             autoplay: true,
-            path: './rickshaw.json'
+            path: './delivery.json'
         });
     }
 }
@@ -70,9 +70,9 @@ function simulateLocationChange() {
 }
 
 function onLocationChangeSuccess(position){
-    const userCoordinates=[position.coords.latitude,position.coords.longitude];
-    drawRoute(userCoordinates,riderCoordinates);
-    distance=turf.distance(userCoordinates,riderCoordinates,{units: 'kilometers'});
+    const riderCoordinates=[position.coords.latitude,position.coords.longitude];
+    drawRoute(riderCoordinates,userCoordinates);
+    distance=turf.distance(riderCoordinates,userCoordinates,{units: 'kilometers'});
     distance = distance.toFixed(2);
     initLottie();
 }
@@ -81,11 +81,11 @@ function onLocationChangeError(error){
     alert('Unable to retriev your location:'+error.message)
 }
 function onLocationSuccess(position){
-    const userCoordinates=[position.coords.latitude,position.coords.longitude];  
-    const bounds = L.latLngBounds([userCoordinates, riderCoordinates]);
+    const riderCoordinates=[position.coords.latitude,position.coords.longitude];  
+    const bounds = L.latLngBounds([riderCoordinates, userCoordinates]);
     map.fitBounds(bounds);
-    drawRoute(userCoordinates,riderCoordinates);
-    distance=turf.distance(userCoordinates,riderCoordinates,{units: 'kilometers'});
+    drawRoute(riderCoordinates,userCoordinates);
+    distance=turf.distance(riderCoordinates,userCoordinates,{units: 'kilometers'});
     distance = distance.toFixed(2);
     initLottie();
 }
@@ -96,17 +96,17 @@ function onLocationError(error){
 
 
 
-function drawRoute(userCoordinates,riderCoordinates){
+function drawRoute(riderCoordinates,userCoordinates){
     if (routingControl) {
         routingControl.setWaypoints([
-            L.latLng(userCoordinates),
-            L.latLng(riderCoordinates)
+            L.latLng(riderCoordinates),
+            L.latLng(userCoordinates)
         ]);
     } else {
     routingControl=L.Routing.control({
         waypoints:[
-            L.latLng(userCoordinates),
-            L.latLng(riderCoordinates)
+            L.latLng(riderCoordinates),
+            L.latLng(userCoordinates)
         ],
         routeWhileDragging: true,
 
@@ -131,13 +131,6 @@ function drawRoute(userCoordinates,riderCoordinates){
                     icon: i === 1 ? homeIcon : busLottie
                 }).addTo(map); 
         
-                const popupContent = i === 1 ? "User Location" : ("Rider is " + distance + " km away");
-                if(markerKey=='rider'){
-                markers[markerKey].bindPopup(popupContent,{
-                    autoClose: false,  
-                    closeOnClick: false  
-                }).openPopup();
-            }
                 return markers[markerKey];
             }
             }
